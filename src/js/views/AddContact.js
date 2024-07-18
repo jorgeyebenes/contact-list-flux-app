@@ -12,15 +12,17 @@ export const AddContact = () => {
 
 	const { store, actions } = useContext(Context);
 
-	function newContact() {
-		actions.createContact(name, email, agenda, address, phone);
+	function newContact(e) {
+		e.preventDefault()
+		actions.createContacts(name, email, address, phone);
+		console.log('hola')
 	}
 
 	return (
 		<div className="container">
 			<div>
 				<h1 className="text-center mt-5">Add a new contact</h1>
-				<form>
+				<form onsubmit={(e)=> newContact(e)}>
 					<div className="form-group">
 						<label>Full Name</label>
 						<input
@@ -44,7 +46,7 @@ export const AddContact = () => {
 					<div className="form-group">
 						<label>Phone</label>
 						<input
-							type="phone"
+							type="number"
 							className="form-control"
 							placeholder="Enter phone"
 							onChange={e => setPhone(e.target.value)}
@@ -61,7 +63,7 @@ export const AddContact = () => {
 							value={address}
 						/>
 					</div>
-					<button type="button" className="btn btn-primary form-control" onClick={newContact}>
+					<button type="submit" className="btn btn-primary form-control">
 						save
 					</button>
 					<Link className="mt-3 w-100 text-center" to="/">

@@ -24,13 +24,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 					.catch(error => console.log(error));
 			},
 
-			createContact: (name, email, agenda, address, phone) => {
-				fetch("https://playground.4geeks.com/apis/fake/contact/", {
+			createContacts: (name, email, address, phone) => {
+				fetch("https://playground.4geeks.com/contact/agendas/jorgeyeb", {
 					method: "POST",
 					body: JSON.stringify({
-						full_name: name,
+						name: name,
 						email: email,
-						agenda_slug: agenda,
 						address: address,
 						phone: phone
 					}),
@@ -46,7 +45,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				fetch("https://playground.4geeks.com/apis/fake/contact/" + id, {
 					method: "PUT",
 					body: JSON.stringify({
-						full_name: name,
+						name: name,
 						email: email,
 						agenda_slug: agenda,
 						address: address,
@@ -64,6 +63,19 @@ const getState = ({ getStore, getActions, setStore }) => {
 					})
 					.then(data => console.log(data))
 					.catch(error => console.log(error));
+			},
+
+			createContacts: ()=> {
+				fetch("https://playground.4geeks.com/contact/agendas/jorgeyeb", {
+					method: "POST",
+					headers: {
+						"Content-type": "application/json"
+					},
+					body: JSON.stringify()
+				})
+				.then (resp => resp.json())
+				.then (data => data)
+				.catch (error => console.log(error))
 			}
 		}
 	};
