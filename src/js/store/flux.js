@@ -1,81 +1,122 @@
-const getState = ({ getStore, getActions, setStore }) => {
-    return {
-        store: {
-            contacts: []
-        },
-        actions: {
-            getAgenda: () => {
-                fetch("https://playground.4geeks.com/apis/fake/contact/agenda/osifrankpeter_list")
-                    .then(response => response.json())
-                    .then(data => setStore({ contacts: data }))
-                    .catch(error => console.log(error));
-            },
-            deleteContact: id => {
-                fetch("https://playground.4geeks.com/apis/fake/contact/" + id, {
-                    method: "DELETE"
-                })
-                    .then(response => {
-                        if (response.status === 201) {
-                            getActions().getAgenda();
-                        }
-                        return response.json();
-                    })
-                    .then(data => console.log(data))
-                    .catch(error => console.log(error));
-            },
-            createContact: (name, email, address, phone) => {
-                fetch("https://playground.4geeks.com/contact/agendas/jorgeyeb/contacts", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        name: name,
-                        email: email,
-                        address: address,
-                        phone: phone
-                    }),
-                    headers: {
-                        "Content-type": "application/json"
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => console.log(data))
-                    .catch(error => console.log(error));
-            },
-            updateContact: (name, email, agenda, address, phone, id) => {
-                fetch("https://playground.4geeks.com/apis/fake/contact/" + id, {
-                    method: "PUT",
-                    body: JSON.stringify({
-                        name: name,
-                        email: email,
-                        agenda_slug: agenda,
-                        address: address,
-                        phone: phone
-                    }),
-                    headers: {
-                        "Content-type": "application/json"
-                    }
-                })
-                    .then(response => {
-                        if (response.status === 201) {
-                            getActions().getAgenda();
-                        }
-                        return response.json();
-                    })
-                    .then(data => console.log(data))
-                    .catch(error => console.log(error));
-            },
-            createAgenda: ()=> {
-                fetch("https://playground.4geeks.com/contact/agendas/jorgeyeb", {
-                    method: "POST",
-                    headers: {
-                        "Content-type": "application/json"
-                    },
-                    body: JSON.stringify()
-                })
-                .then (resp => resp.json())
-                .then (data => data)
-                .catch (error => console.log(error))
-            }
-        }
-    };
-};
+const getState = ({ getStore, setStore, getActions }) => {
+	return {
+		store: {
+			contacts: [],
+			editContact: false,
+			pictureRandom: [],
+			selectedContact: {},
+		},
+		actions: {
+			fetchPostAgenda: () => { //create agenda
+				fetch('https://playground.4geeks.com/contact/agendas/jorgeyeb', {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					}
+				})
+					.then(response => response.json())
+					.then(data => {
+						console.log(data);
+					})
+					.catch(error => console.log(error))
+			},
+			fetchPostContact: (name, phone, email, address) => { //create agenda contact
+				const newContact = {
+					name,
+					phone,
+					email,
+					address,
+				}
+				fetch('https://playground.4geeks.com/contact/agendas/jorgeyeb/contacts', {
+					method: "POST",
+					body: JSON.stringify(newContact),
+					headers: {
+						"Content-Type": "application/json"
+					}
+				})
+					.then(response => response.json())
+					.then(data => {
+						console.log(data);
+					})
+					.catch(error => console.log(error))
+			},
+			fetchGetContact: () => {  //get agenda contacts
+				fetch('https://playground.4geeks.com/contact/agendas/jorgeyeb/contacts', {
+					method: "GET",
+				})
+					.then(response => response.json())
+					.then(data => {
+						console.log(data) // Esto imprimirá en la consola el objeto exacto recibido del servidor
+						const store = getStore(); //guardar algo en mi variable "contacts" del store,
+						setStore({ contacts: data.contacts });
+					})
+					.catch(error => console.log(error))// Manejo de errores
+			},
+			fetchDeleteContact: (id) => { //delete agenda contact
+				const deleteContact = {
+					slug: "jorgeyeb",
+					contact_id: id
+				}
+				fetch(`https://playground.4geeks.com/contact/agendas/jorgeyeb/contacts/${id}`, {
+					method: "DELETE",
+					body: JSON.stringify(deleteContact),
+					headers: {
+						"Content-Type": "application/json"
+					}
+				})
+					.then(response => {
+						console.log(response);
+						if (response.ok) {
+							getActions().fetchGetContact();
+						};
+					})
+
+					.catch(error => console.log(error))// Manejo de errores)
+			},
+			fetchUpdateContact: (name, phone, email, address) => { //update agenda contact
+				const updateContact = {
+					name,
+					phone,
+					email,
+					address,
+				}
+				fetch(`https://playground.4geeks.com/contact/agendas/jorgeyeb/contacts/${getStore().contactId}`, {
+					method: "PUT",
+					body: JSON.stringify(updateContact),
+					headers: {
+						"Content-Type": "application/json"
+					}
+				})
+					.then(response => response.json())
+					.then(data => {
+						console.log(data);
+						getActions().fetchGetContact();
+					})
+					.catch(error => console.log(error))
+			},
+			handleEditContact: (value, id) => {
+				setStore({ editContact: value, contactId: id })
+			},
+			selectedContact: (name, phone, email, address) => {
+				setStore({ selectedContact: { name: name, phone: phone, email: email, address: address } })
+
+			},
+			fetchGetPictureRandom: async () => {  //obtener imagen random cada vez que actualizo página
+				try {
+					const response = await fetch("https://randomuser.me/api/?results=100");
+					const data = await response.json();
+					const userRandom = data.results;
+					setStore({ pictureRandom: userRandom });
+
+
+				} catch (error) {
+					console.error("Error fetching random picture:", error);
+
+				}
+
+			},
+		}
+	};
+}
+
 export default getState;
